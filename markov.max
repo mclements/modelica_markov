@@ -1,3 +1,18 @@
+/*
+(defun f902r ()
+  (interactive)
+  (save-excursion
+    (let ((p1 (region-beginning)))
+      (narrow-to-region p1 (region-end))
+      (goto-char 0)
+      (while (search-forward-regexp "\\([&]\n[&]\\)" nil t) 
+        (replace-match "" t nil))
+      (goto-char 0)
+      (while (search-forward-regexp "\\([*][*]\\)" nil t) 
+        (replace-match "^" t nil))
+      (widen))))
+*/
+
 load(f90)$
 /* Convert f90 output to R /in a region/ using M-x f902r. */
 /* survival::survreg formulation for Weibull regression: shape=exp(alpha) and scale=exp(-beta) (!) */
