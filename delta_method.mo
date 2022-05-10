@@ -1,3 +1,8 @@
+/*
+BSD-3 licence
+Copyright 2022 Felix Felgner
+Copyright 2022 Mark Clements
+*/
 connector Cut
   flow Real p_flow;
   flow Real var_p_flow;
@@ -8,9 +13,9 @@ end Cut;
 
 model State
   Cut cut; 
-  parameter Real p0 = 0;
-  Real p(start=p0); // transition probability
-  Real l;  // length of stay
+  parameter Real p0 = 0 "initial probability";
+  Real p(start=p0)      "transition probability";
+  Real l                "length of stay";
   Real var_p, lower_p, upper_p;
   Real var_l, lower_l, upper_l;
 equation
@@ -28,8 +33,8 @@ end State;
 
 partial model ArcBase
   Cut Start, End;
-  Real lambda;     // transition rate
-  Real var_beta = 0; // variance for beta parameter
+  parameter Real lambda = 1   "transition rate";
+  parameter Real var_beta = 0 "variance for beta parameter";
   Real p_flow;
   Real grad_p_flow;
   Real grad_l_flow;
@@ -41,16 +46,15 @@ equation
   Start.p_flow = p_flow;
   p_flow = Start.p*lambda;
   // grad_p
-  // der(grad_p_flow) = ??
-  var_p_flow = grad_p_flow*grad_p_flow*var_lambda;
+  var_p_flow = grad_p_flow*grad_p_flow*var_beta;
   Start.var_p_flow = var_p_flow;
   End.var_p_flow = var_p_flow;
   // grad_l
   der(grad_l_flow) = grad_p_flow;
-  var_l_flow = grad_l_flow*grad_l_flow*var_lambda;
+  var_l_flow = grad_l_flow*grad_l_flow*var_beta;
   Start.var_l_flow = var_l_flow;
   End.var_l_flow = var_l_flow;
-end Arc;
+end ArcBase;
 
 model ArcExponential
   extends ArcBase;
