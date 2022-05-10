@@ -1,0 +1,107 @@
+# -*- mode: org; -*-
+
+#+OPTIONS: html-style:nil
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/htmlize.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/readtheorg.css"/>
+
+#+HTML_HEAD: <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+#+HTML_HEAD: <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+#+HTML_HEAD: <script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
+#+HTML_HEAD: <script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/js/readtheorg.js"></script>
+
+#+title: Markov models in OpenModelica
+#+author: Mark Clements
+# +options: toc:nil
+
+* A simple example
+
+** Model specification
+
+#+BEGIN_SRC sh :results output :exports results
+cat simple.mo
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+/*
+BSD-3 licence
+Copyright 2022 Felix Felgner
+Copyright 2022 Mark Clements
+,*/
+connector Cut
+  flow Real p_flow;
+  Real p;
+end Cut;
+
+model State
+  Cut cut; 
+  parameter Real p0 = 0 "initial probability";
+  Real p(start=p0)      "transition probability";
+  Real l                "length of stay";
+equation
+  der(p) = cut.p_flow;
+  der(l) = p;
+  cut.p = p;
+end State;
+
+model Arc
+  Cut Start, End;
+  parameter Real lambda = 1 "transition rate";
+  Real p_flow;
+equation
+  Start.p_flow + End.p_flow = 0;
+  Start.p_flow = p_flow;
+  p_flow = Start.p*lambda;
+end Arc;
+
+model Markov1
+  State s1(p0=1), s2, s3;
+  Arc arc1(lambda=0.1);
+  Arc arc2(lambda=0.1);
+  Arc arc3(lambda=0.05);
+equation
+  // s1 -> s2
+  connect(arc1.Start,s1.cut);
+  connect(arc1.End,  s2.cut);
+  // s2 -> s3
+  connect(arc2.Start,s2.cut);
+  connect(arc2.End,  s3.cut);
+  // s2 -> s1
+  connect(arc3.Start,s2.cut);
+  connect(arc3.End,  s1.cut);
+end Markov1;
+#+end_example
+
+** Simulation script
+
+#+BEGIN_SRC sh :results output :exports results
+cat simple.mos
+#+END_SRC
+
+#+RESULTS:
+: loadFile("simple.mo")
+: simulate(Markov1, stopTime=10, outputFormat="csv")
+
+** Running the simulation
+
+#+BEGIN_SRC shell :eval yes
+omc simple.mos
+#+END_SRC
+
+#+RESULTS:
+
+** Simulation output
+
+#+BEGIN_SRC R :session *R* :results output graphics :exports both :file simple.png :eval yes
+  simple = read.csv("Markov1_res.csv")
+  par(mfrow=1:2)
+  cols = c("s1.p", "s2.p", "s3.p")
+  matplot(simple$time, simple[,cols], type="l", ylab="Transition probabilities")
+  legend("topright", legend=cols, lty=1:3, col=1:3, bty="n")
+  cols = c("s1.l", "s2.l", "s3.l")
+  matplot(simple$time, simple[,cols], type="l", ylab="Length of stay")
+  legend("topleft", legend=cols, lty=1:3, col=1:3, bty="n")
+#+END_SRC
+
+#+RESULTS:
+[[file:simple.png]]
