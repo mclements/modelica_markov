@@ -1,0 +1,2 @@
+loadFile("simple.mo");
+simulate(Markov1, stopTime=10, outputFormat="csv");
