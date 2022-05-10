@@ -1,3 +1,7 @@
+/*
+BSD-3 licence
+Copyright 2022 Felix Felgner
+*/
 package MarkovChains
   package Examples
     model Two_States
