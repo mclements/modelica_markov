@@ -1,3 +1,7 @@
+/*
+BSD-3 licence
+Copyright 2022 Mark Clements
+*/
 function hweibull "y = hweibull(time,scale,shape)"
   input Real tm;
   input Real shape = 1;
