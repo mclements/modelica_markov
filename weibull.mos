@@ -1,0 +1,2 @@
+loadFile("weibull.mo");
+simulate(Test, stopTime=10, outputFormat="csv");
