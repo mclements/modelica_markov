@@ -3,6 +3,9 @@
 weibull: weibull.mo weibull.mos
 	omc weibull.mos
 
+delta_method: delta_method.mo delta_method.mos
+	omc delta_method.mos
+
 SHELL := /bin/bash -O extglob
 
 clean:
