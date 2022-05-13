@@ -72,6 +72,15 @@ equation
   der(grad_p_flow[1]) = grad_p_flow[1]*lambda + Start.p*lambda;
 end ArcExponentialLogLambda;
 
+// TODO: Add Weibull (see weibull.mo)
+model ArcWeibull
+  extends ArcBase(nbeta=2);
+equation
+  lambda = Modelica.Math.Distributions.Weibull.density(time,exp(beta[1]),exp(-beta[2]))/(1-Modelica.Math.Distributions.Weibull.cumulative(time,exp(beta[1]),exp(-beta[2])));
+  der(grad_p_flow[1]) = grad_p_flow[1]*lambda + Start.p*(exp(exp(beta[1])*beta[2]+2*beta[1])*tm^(exp(beta[1])-1)*log(tm)+(exp(beta[1])*beta[2]+1)*exp(exp(beta[1])*beta[2]+beta[1])*tm^(exp(beta[1])-1));
+  der(grad_p_flow[2]) = grad_p_flow[2]*lambda + Start.p*(exp(exp(beta[1])*beta[2]+2*beta[1])*tm^(exp(beta[1])-1));
+end ArcWeibull;
+
 model Markov1
   State s1(p0=1), s2, s3;
   ArcExponential arc1(beta={0.1},var_beta={{1e-4}});
