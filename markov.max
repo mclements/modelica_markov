@@ -1,16 +1,19 @@
 /*
-(defun f902r ()
-  (interactive)
-  (save-excursion
-    (let ((p1 (region-beginning)))
-      (narrow-to-region p1 (region-end))
-      (goto-char 0)
-      (while (search-forward-regexp "\\([&]\n[&]\\)" nil t) 
-        (replace-match "" t nil))
-      (goto-char 0)
-      (while (search-forward-regexp "\\([*][*]\\)" nil t) 
-        (replace-match "^" t nil))
-      (widen))))
+(defun f902r (p1 p2)
+  (interactive "r")
+  (condition-case err
+      (save-excursion
+	(narrow-to-region p1 p2)
+	(let ((replace (lambda (pattern val)
+			 (goto-char 0)
+			 (while (search-forward-regexp pattern nil t)
+			   (replace-match val t nil)))))
+	  (funcall replace "\\([&]\n[&]\\)" "")
+	  (funcall replace "\\([*][*]\\)" "^")
+	  (widen)))
+    (error
+     (widen) ; ensure that (widen) is always called
+     (debug err))))
 */
 
 load(f90)$
@@ -27,7 +30,10 @@ f90(diff(hweibull,beta));
 exp(exp(alpha)*beta+2*alpha)*t^(exp(alpha)-1)
 */
 
-
+f90(diff(hweibull,t));
+/*
+(exp(alpha)-1)*exp(exp(alpha)*beta+alpha)*t^(exp(alpha)-2)
+*/
 
 
 
