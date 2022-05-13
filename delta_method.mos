@@ -1,0 +1,2 @@
+loadFile("delta_method.mo");
+simulate(Markov1, stopTime=10, outputFormat="csv");
