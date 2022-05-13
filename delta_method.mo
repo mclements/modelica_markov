@@ -33,11 +33,13 @@ end State;
 
 partial model ArcBase
   Cut Start, End;
-  parameter Real lambda = 1   "transition rate";
-  parameter Real var_beta = 0 "variance for beta parameter";
+  parameter Integer nbeta = 1;
+  parameter Real beta[nbeta] = zeros(nbeta);
+  parameter Real var_beta[nbeta,nbeta] = zeros(nbeta,nbeta) "variance for beta parameter";
+  Real lambda   "transition rate";
   Real p_flow;
-  Real grad_p_flow;
-  Real grad_l_flow;
+  Real grad_p_flow[nbeta];
+  Real grad_l_flow[nbeta];
   Real var_p_flow;
   Real var_l_flow;
 equation
@@ -46,12 +48,12 @@ equation
   Start.p_flow = p_flow;
   p_flow = Start.p*lambda;
   // grad_p
-  var_p_flow = grad_p_flow*grad_p_flow*var_beta;
+  var_p_flow = grad_p_flow*var_beta*grad_p_flow;
   Start.var_p_flow = var_p_flow;
   End.var_p_flow = var_p_flow;
   // grad_l
   der(grad_l_flow) = grad_p_flow;
-  var_l_flow = grad_l_flow*grad_l_flow*var_beta;
+  var_l_flow = grad_l_flow*var_beta*grad_l_flow;
   Start.var_l_flow = var_l_flow;
   End.var_l_flow = var_l_flow;
 end ArcBase;
@@ -59,20 +61,22 @@ end ArcBase;
 model ArcExponential
   extends ArcBase;
 equation
-  der(grad_p_flow) = grad_p_flow*lambda + Start.p;
+  lambda = beta[1];
+  der(grad_p_flow[1]) = grad_p_flow[1]*lambda + Start.p;
 end ArcExponential;
 
 model ArcExponentialLogLambda
   extends ArcBase;
 equation
-  der(grad_p_flow) = grad_p_flow*lambda + Start.p*lambda;
+  lambda = exp(beta[1]);
+  der(grad_p_flow[1]) = grad_p_flow[1]*lambda + Start.p*lambda;
 end ArcExponentialLogLambda;
 
 model Markov1
   State s1(p0=1), s2, s3;
-  ArcExponential arc1(lambda=0.1,var_beta=1e-4);
-  ArcExponential arc2(lambda=0.1,var_beta=1e-4);
-  ArcExponentialLogLambda arc3(lambda=0.05,var_beta=1);
+  ArcExponential arc1(beta={0.1},var_beta={{1e-4}});
+  ArcExponential arc2(beta={0.1},var_beta={{1e-4}});
+  ArcExponentialLogLambda arc3(beta={0.05},var_beta={{1}});
 equation
   connect(s1.cut,arc1.Start);
   connect(arc1.End,s2.cut);
