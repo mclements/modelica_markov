@@ -37,3 +37,11 @@ f90(diff(hweibull,t));
 
 
 
+f90(diff(diff(hweibull,alpha),t));
+/*
+(exp(alpha)-1)*exp(exp(alpha)*beta+2*alpha)*t^(exp(alpha)-2)*log(t)+exp(exp(alpha)*beta+2*alpha)*t^(exp(alpha)-2)+(exp(alpha)-1)*(exp(alpha)*beta+1)*exp(exp(alpha)*beta+alpha)*t^(exp(alpha)-2)
+*/
+f90(diff(diff(hweibull,beta),t));
+/*
+(exp(alpha)-1)*exp(exp(alpha)*beta+2*alpha)*t^(exp(alpha)-2)
+*/
