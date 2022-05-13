@@ -21,6 +21,7 @@ algorithm
   y := hweibull(tm, exp(alpha), exp(-beta));
 end hweibull_survreg;
 
+// Does this also need a derivative?
 function hweibull_survreg_grad "y = hweibull_survreg_grad(tm,alpha,beta)"
   input Real tm;
   input Real alpha;
@@ -34,6 +35,9 @@ algorithm
   y[1] := if tm>0 then exp(exp(alpha)*beta+2*alpha)*tm^(exp(alpha)-1)*log(tm)+(exp(alpha)*beta+1)*exp(exp(alpha)*beta+alpha)*tm^(exp(alpha)-1) else 1e-16;
   y[2] := if tm>0 then exp(exp(alpha)*beta+2*alpha)*tm^(exp(alpha)-1) else 1e-16;
 end hweibull_survreg_grad;
+
+// (exp(alpha)-1)*exp(exp(alpha)*beta+2*alpha)*t^(exp(alpha)-2)*log(t)+exp(exp(alpha)*beta+2*alpha)*t^(exp(alpha)-2)+(exp(alpha)-1)*(exp(alpha)*beta+1)*exp(exp(alpha)*beta+alpha)*t^(exp(alpha)-2)
+// (exp(alpha)-1)*exp(exp(alpha)*beta+2*alpha)*t^(exp(alpha)-2)
 
 function hweibull_survreg_deriv "y = hweibull_survreg_deriv(tm,alpha,beta)"
   input Real tm;
@@ -67,6 +71,9 @@ equation
 end WeibullRate;
 
 // Erlang distribution using compartments (this is quite cool:)
+// Note that this is both a state and a transition.
+// TODO: How to use this in a Markov model?
+// TODO: Add gradients and derivatives?
 model Erlang
   // extends RateFunction; // ?
   // extends State; // ?
@@ -86,6 +93,11 @@ equation
   lambdaOut = p[n]*lambda;
   psum = sum(p);
 end Erlang;
+
+// TODO: Add phase type distributions
+// TODO: Add costs, discounting, health state values
+// TODO: Add other distributions
+// TODO: How to model for a tree of chance nodes? How to connect states?
 
 // Add a chance node to a rate
 model ChanceRate
